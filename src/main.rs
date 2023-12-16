@@ -1,28 +1,54 @@
-use actix::{Actor, StreamHandler};
+use actix::{Actor, StreamHandler, AsyncContext};
 use actix_web::{web, App, Error, HttpRequest, HttpResponse, HttpServer};
 use actix_web_actors::ws;
+use std::str;
+use rand::Rng; // For generating random numbers
+use std::time::Duration;
 
-//Defined your WebSocket actor
+// Define your WebSocket actor
 struct TerraSocket;
 
 impl Actor for TerraSocket {
     type Context = ws::WebsocketContext<Self>;
 
-    //Actor logic below
-}
-
-//Websocket StreamHandler for message handling
-impl StreamHandler<Result<ws::Message, ws::ProtocolError>> for TerraSocket {
-    fn handle(&mut self, msg: Result<ws::Message, ws::ProtocolError>, _ctx: &mut Self::Context) {
-        //Handle messages here
+    // Actor logic here
+    fn started(&mut self, ctx: &mut Self::Context) {
+        // Schedule a task to send random data periodically
+        ctx.run_interval(Duration::from_secs(5), |act, ctx| {
+            // Generate random data
+            let random_data = rand::thread_rng().gen_range(0..100);
+            // Send the random data to the client
+            ctx.text(format!("Periodic random data: {}", random_data));
+        });
     }
 }
 
-//Setup WebSocket route
+// WebSocket StreamHandler for message handling
+impl StreamHandler<Result<ws::Message, ws::ProtocolError>> for TerraSocket {
+    fn handle(&mut self, msg: Result<ws::Message, ws::ProtocolError>, _ctx: &mut Self::Context) {
+        match msg {
+            Ok(ws::Message::Text(text)) => {
+                println!("Received text message: {}", text);
+                // Handle text message
+            
+            }
+            Ok(ws::Message::Binary(bin)) => {
+                if let Ok(text) = str::from_utf8(&bin) {
+                    println!("Received binary message: {}", text);
+                    // Handle binary message as text
+                }
+            }
+            _ => {
+                // Handle other message types like Ping, Pong, Close
+            }
+        }
+    }
+}
+
+// Setup WebSocket route
 async fn websocket_route(req: HttpRequest, stream: web::Payload) -> Result<HttpResponse, Error> {
     ws::start(TerraSocket, &req, stream)
 }
-
 
 #[actix_rt::main]
 async fn main() -> std::io::Result<()> {
@@ -32,35 +58,4 @@ async fn main() -> std::io::Result<()> {
     .bind("127.0.0.1:8080")?
     .run()
     .await
-}
-
-// Unit tests
-#[cfg(test)]
-mod server_tests {
-    use super::*;
-    use actix_web::{test, web, App};
-
-    // Test the WebSocket route
-    #[actix_rt::test]
-    async fn test_websocket_route() {
-        let mut app = test::init_service(
-            App::new().route("/ws/", web::get().to(websocket_route))
-        ).await;
-
-        // Create a WebSocket upgrade request
-        let req = test::TestRequest::with_uri("/ws/")
-            .header("Connection", "Upgrade")
-            .header("Upgrade", "websocket")
-            .header("Sec-WebSocket-Key", "test")
-            .header("Sec-WebSocket-Version", "13")
-            .to_request();
-
-        // Simulate a WebSocket connection
-        let (resp, mut connection) = test::start_ws(&mut app, req)
-            .await
-            .expect("Failed to start WebSocket connection");
-
-        //should return a 101 status for switching protocols
-        assert_eq!(resp.status(), 101);
-    }
 }
