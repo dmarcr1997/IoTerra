@@ -12,10 +12,12 @@ actix-web = "4.0.0-beta.8"
 # Actix WebSocket dependencies
 actix-rt = "2.2"
 actix-web-actors = "4.0.0-beta.8"
+
 log = "0.4"
 env_logger = "0.10.1"
 rand = "0.8.4"
 # Serde for serialization and deserialization
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
+tungstenite = "0.21.0"
 url = "2.2.2"

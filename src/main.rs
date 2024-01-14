@@ -7,6 +7,8 @@ use std::time::{Duration, Instant};
 use std::collections::HashMap;
 use log::{error, info};
 use std::sync::{Mutex, Arc};
+mod devices;
+use devices::Device;
 
 struct AppState {
     topics_data: Mutex<HashMap<String, (String, Instant)>>,
@@ -106,7 +108,7 @@ async fn main() -> std::io::Result<()> {
     let shared_state = Arc::new(AppState {
         topics_data: Mutex::new(HashMap::new()),
     });
-    HttpServer::new(move || {
+    let server = HttpServer::new(move || {
         App::new()
             .app_data(web::Data::new(shared_state.clone()))
             .route("/ws/", web::get().to(websocket_route))
@@ -116,6 +118,16 @@ async fn main() -> std::io::Result<()> {
         error!("Failed to bind to address: {}", err);
         err
     })?
-    .run()
-    .await
+    .run();
+
+    // Create and start the device
+    let gps_device = Device::new("gpsTracker", 10, 39.0, 41.0, -79.0, -78.0, false);
+    gps_device.start();
+
+    let temp_device = Device::new("tempTracker", 2, -10.0, 120.0, 0.0, 0.0, true);
+    temp_device.start();
+
+    // Start the server
+    server.await
+    
 }
