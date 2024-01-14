@@ -121,12 +121,14 @@ async fn main() -> std::io::Result<()> {
     .run();
 
     // Create and start the device
-    let gps_device = Device::new("gpsTracker", 10, 39.0, 41.0, -79.0, -78.0, false);
+    let gps_device = Device::new("gpsTracker", 10, 39.0, 41.0, -79.0, -78.0, false, false);
     gps_device.start();
 
-    let temp_device = Device::new("tempTracker", 2, -10.0, 120.0, 0.0, 0.0, true);
+    let temp_device = Device::new("tempTracker", 2, -10.0, 120.0, 0.0, 0.0, true, false);
     temp_device.start();
 
+    let battery_device = Device::new("battery", 5, 0.1, 5.0, 0.0, 0.0, false, true);
+    battery_device.start();
     // Start the server
     server.await
     
