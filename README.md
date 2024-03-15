@@ -35,28 +35,6 @@ This Rust-based IoT Device Simulator is designed to simulate interactions betwee
 - Simulated IoT devices can connect to the server via WebSocket at `ws://localhost:8080/ws/?deviceId=deviceId&scenario=scenarioNumber`.
 - **Client Dashboard Connection:** 
 - The client dashboard can connect to the WebSocket server to receive real-time updates from the simulated devices (dashboard implementation pending).
-
-## Development
-
-### Adding a New Device Simulator
-(TBD - Describe steps to add and integrate a new type of IoT device simulator.)
-
-### Extending the Server
-(TBD - Instructions on how to extend the server functionality or add new features.)
-
-## Testing
-(TBD - Guidelines on how to run unit tests and integration tests.)
-
-## Contributing
-(If this is an open project, provide instructions for how others can contribute to the project.)
-
-## License
-(Indicate the license under which this project is released, if applicable.)
-
-## Acknowledgments
-(Credits to any third-party assets, libraries, or contributors.)
-
-## Contact
 (Your contact information or links to your social media.)
 
 
